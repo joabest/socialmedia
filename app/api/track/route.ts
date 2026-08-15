@@ -1,0 +1,3 @@
+import {NextRequest,NextResponse} from 'next/server';import {adminDb} from '@/lib/data';
+export async function POST(req:NextRequest){const db=adminDb();if(!db)return NextResponse.json({ok:true,demo:true});const body=await req.json();const ip=req.headers.get('x-forwarded-for')?.split(',')[0]||'';await db.from('events').insert({event_type:body.type||'page_view',candidate_id:body.candidateId||null,link_id:body.linkId||null,path:body.path||'/',referrer:body.referrer||'',user_agent:req.headers.get('user-agent')||'',ip_hash:ip?await hash(ip):null});return NextResponse.json({ok:true})}
+async function hash(v:string){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
